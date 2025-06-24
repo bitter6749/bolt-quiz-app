@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LoginButton } from '@/components/auth/LoginButton'
 import { GraduationCap, Sparkles, Upload, BarChart3 } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -55,7 +55,9 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <LoginButton />
+            <Button asChild size="lg">
+              <Link href="/login">Get Started</Link>
+            </Button>
             <Button variant="outline" size="lg">
               Learn More
             </Button>
@@ -99,7 +101,9 @@ export default function Home() {
           <p className="text-muted-foreground">
             Sign in with Google to begin creating your first AI-generated quiz.
           </p>
-          <LoginButton />
+          <Button asChild size="lg">
+            <Link href="/login">Sign In</Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -12,11 +12,13 @@ export default withAuth(
           return token?.role === 'ADMIN'
         }
         
-        // Protect all other routes except login
-        if (req.nextUrl.pathname.startsWith('/login')) {
+        // Allow access to auth pages
+        if (req.nextUrl.pathname.startsWith('/login') || 
+            req.nextUrl.pathname.startsWith('/auth/error')) {
           return true
         }
         
+        // Protect all other routes
         return !!token
       },
     },
@@ -31,6 +33,7 @@ export const config = {
     '/admin/:path*',
     '/api/quiz/:path*',
     '/api/ai/:path*',
-    '/api/admin/:path*'
+    '/api/admin/:path*',
+    '/api/user/:path*'
   ]
 }
