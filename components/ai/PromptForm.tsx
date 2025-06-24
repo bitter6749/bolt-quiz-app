@@ -20,7 +20,7 @@ export function PromptForm({ onGenerate, disabled }: PromptFormProps) {
     e.preventDefault()
     
     if (!prompt.trim()) {
-      toast.error('Please enter a prompt')
+      toast.error('プロンプトを入力してください')
       return
     }
 
@@ -37,16 +37,16 @@ export function PromptForm({ onGenerate, disabled }: PromptFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate quiz')
+        throw new Error(errorData.error || 'クイズの生成に失敗しました')
       }
 
       const quizData = await response.json()
       onGenerate(quizData)
       setPrompt('')
-      toast.success('Quiz generated successfully!')
+      toast.success('クイズが正常に生成されました！')
     } catch (error) {
       console.error('Error generating quiz:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to generate quiz')
+      toast.error(error instanceof Error ? error.message : 'クイズの生成に失敗しました')
     } finally {
       setIsGenerating(false)
     }
@@ -57,16 +57,16 @@ export function PromptForm({ onGenerate, disabled }: PromptFormProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5" />
-          AI Quiz Generator
+          AIクイズ生成
         </CardTitle>
         <CardDescription>
-          Describe the topic or subject you want to create a quiz about
+          クイズを作成したいトピックや科目について説明してください
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Textarea
-            placeholder="e.g., Create a quiz about photosynthesis for high school students, or generate questions about React hooks for developers..."
+            placeholder="例：高校生向けの光合成に関するクイズを作成してください、または開発者向けのReact hooksに関する問題を生成してください..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={4}
@@ -80,12 +80,12 @@ export function PromptForm({ onGenerate, disabled }: PromptFormProps) {
             {isGenerating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating Quiz...
+                クイズ生成中...
               </>
             ) : (
               <>
                 <Sparkles className="mr-2 h-4 w-4" />
-                Generate Quiz
+                クイズ生成
               </>
             )}
           </Button>

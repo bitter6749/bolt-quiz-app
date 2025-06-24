@@ -41,15 +41,15 @@ export default function Dashboard() {
 
       if (response.ok) {
         const savedQuiz = await response.json()
-        toast.success('Quiz saved successfully!')
+        toast.success('クイズが正常に保存されました！')
         setGeneratedQuiz(null)
         router.push(`/quiz/${savedQuiz.id}`)
       } else {
-        throw new Error('Failed to save quiz')
+        throw new Error('クイズの保存に失敗しました')
       }
     } catch (error) {
       console.error('Error saving quiz:', error)
-      toast.error('Failed to save quiz')
+      toast.error('クイズの保存に失敗しました')
     }
   }
 
@@ -66,7 +66,7 @@ export default function Dashboard() {
     linkElement.setAttribute('download', exportFileDefaultName)
     linkElement.click()
     
-    toast.success('Quiz exported successfully!')
+    toast.success('クイズが正常にエクスポートされました！')
   }
 
   return (
@@ -75,22 +75,22 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Create and manage your AI-generated quizzes</p>
+            <h1 className="text-3xl font-bold">ダッシュボード</h1>
+            <p className="text-muted-foreground">AI生成クイズの作成と管理</p>
           </div>
           
           <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
             <DialogTrigger asChild>
               <Button size="lg">
                 <Plus className="mr-2 h-4 w-4" />
-                Generate Quiz
+                クイズ生成
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Generate New Quiz</DialogTitle>
+                <DialogTitle>新しいクイズを生成</DialogTitle>
                 <DialogDescription>
-                  Choose how you'd like to create your quiz
+                  クイズの作成方法を選択してください
                 </DialogDescription>
               </DialogHeader>
               
@@ -98,11 +98,11 @@ export default function Dashboard() {
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="prompt">
                     <Sparkles className="mr-2 h-4 w-4" />
-                    From Prompt
+                    プロンプトから
                   </TabsTrigger>
                   <TabsTrigger value="pdf">
                     <Upload className="mr-2 h-4 w-4" />
-                    From PDF
+                    PDFから
                   </TabsTrigger>
                 </TabsList>
                 
@@ -133,18 +133,18 @@ export default function Dashboard() {
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={handleExportQuiz}>
                     <Download className="mr-2 h-4 w-4" />
-                    Export JSON
+                    JSON出力
                   </Button>
                   <Button onClick={handleSaveQuiz}>
-                    Save & Take Quiz
+                    保存してクイズ開始
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Generated {generatedQuiz.questions.length} questions. 
-                Save this quiz to start taking it or export as JSON for later use.
+                {generatedQuiz.questions.length}問の問題を生成しました。
+                このクイズを保存して開始するか、JSONファイルとしてエクスポートできます。
               </p>
             </CardContent>
           </Card>
@@ -152,7 +152,7 @@ export default function Dashboard() {
 
         {/* Quizzes */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Your Quizzes</h2>
+          <h2 className="text-2xl font-semibold">あなたのクイズ</h2>
           <QuizList />
         </div>
       </div>

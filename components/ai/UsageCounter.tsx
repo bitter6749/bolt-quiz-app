@@ -52,15 +52,15 @@ export function UsageCounter() {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Zap className="h-4 w-4" />
-          Monthly AI Usage
+          月間AI使用量
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>Used: {usage.used}/{usage.limit}</span>
+            <span>使用済み: {usage.used}/{usage.limit}</span>
             <span className={remaining === 0 ? 'text-destructive font-medium' : 'text-muted-foreground'}>
-              {remaining} remaining
+              残り {remaining}回
             </span>
           </div>
           <Progress 
@@ -69,7 +69,7 @@ export function UsageCounter() {
           />
           {remaining === 0 && (
             <p className="text-xs text-destructive">
-              You've reached your monthly limit. It will reset next month.
+              月間制限に達しました。来月にリセットされます。
             </p>
           )}
         </div>
