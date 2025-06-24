@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { quizSetDb, quizAttemptDb } from '@/lib/db'
 
 export async function GET() {
   try {
@@ -10,17 +10,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const quizSets = await prisma.quizSet.findMany({
-      where: { createdBy: session.user.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
+    const quizSets = await quizSetDb.findMany({ createdBy: session.user.id })
+    
+    // Add attempt counts
+    const quizSetsWithCounts = await Promise.all(
+      quizSets.map(async (quiz) => ({
+        ...quiz,
         _count: {
-          select: { attempts: true }
+          attempts: await quizAttemptDb.count({ quizSetId: quiz.id })
         }
-      }
-    })
+      }))
+    )
 
-    return NextResponse.json(quizSets)
+    return NextResponse.json(quizSetsWithCounts)
   } catch (error) {
     console.error('Error fetching quizzes:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -36,13 +38,11 @@ export async function POST(request: NextRequest) {
 
     const { title, description, questions } = await request.json()
 
-    const quizSet = await prisma.quizSet.create({
-      data: {
-        title,
-        description,
-        questions: JSON.stringify(questions),
-        createdBy: session.user.id,
-      },
+    const quizSet = await quizSetDb.create({
+      title,
+      description,
+      questions: JSON.stringify(questions),
+      createdBy: session.user.id,
     })
 
     return NextResponse.json(quizSet)

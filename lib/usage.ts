@@ -1,15 +1,11 @@
-import { prisma } from './prisma'
+import { monthlyUsageDb, usageLogDb } from './db'
 
 export async function checkMonthlyLimit(userId: string): Promise<boolean> {
   const currentMonth = new Date().toISOString().slice(0, 7)
   
-  const usage = await prisma.monthlyUsage.findUnique({
-    where: { 
-      userId_monthYear: { 
-        userId, 
-        monthYear: currentMonth 
-      } 
-    }
+  const usage = await monthlyUsageDb.findUnique({
+    userId,
+    monthYear: currentMonth
   })
   
   const MONTHLY_LIMIT = 10
@@ -19,13 +15,9 @@ export async function checkMonthlyLimit(userId: string): Promise<boolean> {
 export async function getCurrentUsage(userId: string): Promise<{ used: number; limit: number }> {
   const currentMonth = new Date().toISOString().slice(0, 7)
   
-  const usage = await prisma.monthlyUsage.findUnique({
-    where: { 
-      userId_monthYear: { 
-        userId, 
-        monthYear: currentMonth 
-      } 
-    }
+  const usage = await monthlyUsageDb.findUnique({
+    userId,
+    monthYear: currentMonth
   })
   
   return {
@@ -43,33 +35,29 @@ export async function recordUsage(
   const currentMonth = new Date().toISOString().slice(0, 7)
   
   // Create usage log
-  await prisma.usageLog.create({
-    data: { 
-      userId, 
-      action, 
-      promptText, 
-      costEstimate,
-      monthYear: currentMonth 
-    }
+  await usageLogDb.create({ 
+    userId, 
+    action, 
+    promptText, 
+    costEstimate,
+    monthYear: currentMonth 
   })
   
   // Update monthly usage
-  await prisma.monthlyUsage.upsert({
-    where: { 
-      userId_monthYear: { 
-        userId, 
-        monthYear: currentMonth 
-      } 
+  await monthlyUsageDb.upsert(
+    { 
+      userId, 
+      monthYear: currentMonth 
     },
-    update: { 
-      totalPrompts: { increment: 1 },
-      totalCost: { increment: costEstimate || 0 }
+    { 
+      totalPrompts: (await monthlyUsageDb.findUnique({ userId, monthYear: currentMonth }))?.totalPrompts + 1 || 1,
+      totalCost: ((await monthlyUsageDb.findUnique({ userId, monthYear: currentMonth }))?.totalCost || 0) + (costEstimate || 0)
     },
-    create: { 
+    { 
       userId, 
       monthYear: currentMonth, 
       totalPrompts: 1,
       totalCost: costEstimate || 0
     }
-  })
+  )
 }

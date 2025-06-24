@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
+import { quizSetDb } from '@/lib/db'
 import { QuizPlayer } from '@/components/quiz/QuizPlayer'
 
 interface PageProps {
@@ -7,9 +7,7 @@ interface PageProps {
 }
 
 export default async function QuizPage({ params }: PageProps) {
-  const quiz = await prisma.quizSet.findUnique({
-    where: { id: params.id },
-  })
+  const quiz = await quizSetDb.findUnique({ id: params.id })
 
   if (!quiz) {
     notFound()

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { quizAttemptDb } from '@/lib/db'
 
 export async function POST(
   request: NextRequest,
@@ -15,14 +15,12 @@ export async function POST(
 
     const { answers, score, totalQuestions } = await request.json()
 
-    const attempt = await prisma.quizAttempt.create({
-      data: {
-        userId: session.user.id,
-        quizSetId: params.id,
-        answers: JSON.stringify(answers),
-        score,
-        totalQuestions,
-      },
+    const attempt = await quizAttemptDb.create({
+      userId: session.user.id,
+      quizSetId: params.id,
+      answers: JSON.stringify(answers),
+      score,
+      totalQuestions,
     })
 
     return NextResponse.json(attempt)

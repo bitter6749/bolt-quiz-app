@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { quizSetDb, userDb } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
@@ -13,18 +13,14 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const quizSet = await prisma.quizSet.findUnique({
-      where: { id: params.id },
-      include: {
-        user: {
-          select: { name: true, email: true }
-        }
-      }
-    })
+    const quizSet = await quizSetDb.findUnique({ id: params.id })
 
     if (!quizSet) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 })
     }
+
+    // Get user info
+    const user = await userDb.findUnique({ id: quizSet.createdBy })
 
     // Parse questions JSON
     const questionsData = JSON.parse(quizSet.questions)
@@ -32,6 +28,7 @@ export async function GET(
     return NextResponse.json({
       ...quizSet,
       questions: questionsData,
+      user: user ? { name: user.name, email: user.email } : null
     })
   } catch (error) {
     console.error('Error fetching quiz:', error)
@@ -49,9 +46,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const quizSet = await prisma.quizSet.findUnique({
-      where: { id: params.id }
-    })
+    const quizSet = await quizSetDb.findUnique({ id: params.id })
 
     if (!quizSet) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 })
@@ -61,9 +56,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    await prisma.quizSet.delete({
-      where: { id: params.id }
-    })
+    await quizSetDb.delete({ id: params.id })
 
     return NextResponse.json({ success: true })
   } catch (error) {
