@@ -17,13 +17,13 @@ export function LoginButton() {
   const { data: session, status } = useSession()
 
   if (status === 'loading') {
-    return <Button variant="ghost" disabled>Loading...</Button>
+    return <Button variant="ghost" disabled>読み込み中...</Button>
   }
 
   if (!session) {
     return (
       <Button onClick={() => signIn('google')} variant="default">
-        Sign in with Google
+        Googleでサインイン
       </Button>
     )
   }
@@ -52,16 +52,16 @@ export function LoginButton() {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
+          <span>プロフィール</span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
+          <span>設定</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>ログアウト</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

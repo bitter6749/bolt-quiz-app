@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Play, Trash2, Calendar, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
+import { ja } from 'date-fns/locale'
 
 interface Quiz {
   id: string
@@ -36,14 +37,14 @@ export function QuizList() {
       }
     } catch (error) {
       console.error('Error fetching quizzes:', error)
-      toast.error('Failed to load quizzes')
+      toast.error('クイズの読み込みに失敗しました')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this quiz?')) return
+    if (!confirm('このクイズを削除してもよろしいですか？')) return
 
     try {
       const response = await fetch(`/api/quiz/${id}`, {
@@ -52,13 +53,13 @@ export function QuizList() {
 
       if (response.ok) {
         setQuizzes(quizzes.filter(quiz => quiz.id !== id))
-        toast.success('Quiz deleted successfully')
+        toast.success('クイズが正常に削除されました')
       } else {
-        throw new Error('Failed to delete quiz')
+        throw new Error('クイズの削除に失敗しました')
       }
     } catch (error) {
       console.error('Error deleting quiz:', error)
-      toast.error('Failed to delete quiz')
+      toast.error('クイズの削除に失敗しました')
     }
   }
 
@@ -84,9 +85,9 @@ export function QuizList() {
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">No quizzes created yet.</p>
+          <p className="text-muted-foreground">まだクイズが作成されていません。</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Use the AI generator to create your first quiz!
+            AI生成機能を使って最初のクイズを作成しましょう！
           </p>
         </CardContent>
       </Card>
@@ -115,11 +116,11 @@ export function QuizList() {
             <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
               <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {formatDistanceToNow(new Date(quiz.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(quiz.createdAt), { addSuffix: true, locale: ja })}
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
-                {quiz._count.attempts} attempt{quiz._count.attempts !== 1 ? 's' : ''}
+                {quiz._count.attempts}回挑戦
               </div>
             </div>
             
@@ -127,7 +128,7 @@ export function QuizList() {
               <Button asChild size="sm" className="flex-1">
                 <Link href={`/quiz/${quiz.id}`}>
                   <Play className="h-3 w-3 mr-1" />
-                  Take Quiz
+                  クイズ開始
                 </Link>
               </Button>
               <Button

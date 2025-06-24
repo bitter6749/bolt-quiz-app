@@ -22,9 +22,9 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
     const pdfFile = acceptedFiles[0]
     if (pdfFile && pdfFile.type === 'application/pdf') {
       setFile(pdfFile)
-      toast.success('PDF file selected')
+      toast.success('PDFファイルが選択されました')
     } else {
-      toast.error('Please select a PDF file')
+      toast.error('PDFファイルを選択してください')
     }
   }, [])
 
@@ -41,7 +41,7 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
     e.preventDefault()
     
     if (!file) {
-      toast.error('Please select a PDF file')
+      toast.error('PDFファイルを選択してください')
       return
     }
 
@@ -61,17 +61,17 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate quiz from PDF')
+        throw new Error(errorData.error || 'PDFからのクイズ生成に失敗しました')
       }
 
       const quizData = await response.json()
       onGenerate(quizData)
       setFile(null)
       setPrompt('')
-      toast.success('Quiz generated from PDF successfully!')
+      toast.success('PDFからクイズが正常に生成されました！')
     } catch (error) {
       console.error('Error generating quiz from PDF:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to generate quiz from PDF')
+      toast.error(error instanceof Error ? error.message : 'PDFからのクイズ生成に失敗しました')
     } finally {
       setIsGenerating(false)
     }
@@ -86,10 +86,10 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          Generate from PDF
+          PDFからクイズ生成
         </CardTitle>
         <CardDescription>
-          Upload a PDF document and optionally specify what to focus on
+          PDFドキュメントをアップロードし、オプションで焦点を当てる内容を指定してください
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -106,11 +106,11 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
               <input {...getInputProps()} />
               <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               {isDragActive ? (
-                <p>Drop the PDF file here...</p>
+                <p>PDFファイルをここにドロップしてください...</p>
               ) : (
                 <div>
-                  <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                  <p className="text-xs text-muted-foreground">PDF files only</p>
+                  <p className="text-sm font-medium">クリックしてアップロードまたはドラッグ&ドロップ</p>
+                  <p className="text-xs text-muted-foreground">PDFファイルのみ</p>
                 </div>
               )}
             </div>
@@ -133,7 +133,7 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
           )}
           
           <Textarea
-            placeholder="Optional: Specify what aspects to focus on (e.g., 'Focus on key concepts and definitions')"
+            placeholder="オプション：焦点を当てる内容を指定してください（例：「重要な概念と定義に焦点を当てる」）"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={2}
@@ -148,12 +148,12 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
             {isGenerating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing PDF...
+                PDF処理中...
               </>
             ) : (
               <>
                 <Upload className="mr-2 h-4 w-4" />
-                Generate from PDF
+                PDFからクイズ生成
               </>
             )}
           </Button>

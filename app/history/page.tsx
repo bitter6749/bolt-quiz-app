@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Calendar, Trophy, Target } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { ja } from 'date-fns/locale'
 
 interface QuizAttempt {
   id: string
@@ -37,7 +38,7 @@ export default function HistoryPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          <h1 className="text-3xl font-bold">Quiz History</h1>
+          <h1 className="text-3xl font-bold">クイズ履歴</h1>
           <div className="grid gap-4">
             {[...Array(5)].map((_, i) => (
               <Card key={i}>
@@ -59,17 +60,17 @@ export default function HistoryPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Quiz History</h1>
-          <p className="text-muted-foreground">Review your past quiz attempts and progress</p>
+          <h1 className="text-3xl font-bold">クイズ履歴</h1>
+          <p className="text-muted-foreground">過去のクイズ挑戦と進捗を確認</p>
         </div>
 
         {attempts.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
               <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No quiz attempts yet.</p>
+              <p className="text-muted-foreground">まだクイズに挑戦していません。</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Take your first quiz to see your progress here!
+                最初のクイズに挑戦して、ここで進捗を確認しましょう！
               </p>
             </CardContent>
           </Card>
@@ -97,11 +98,11 @@ export default function HistoryPage() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true, locale: ja })}
                       </div>
                       <div className="flex items-center gap-1">
                         <Target className="h-4 w-4" />
-                        {attempt.totalQuestions} questions
+                        {attempt.totalQuestions}問
                       </div>
                     </div>
                   </CardContent>

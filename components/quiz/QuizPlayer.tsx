@@ -120,18 +120,18 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
       if (response.ok) {
         router.push(`/quiz/${quiz.id}/result?score=${score}&total=${quiz.questions.length}`)
       } else {
-        throw new Error('Failed to submit quiz')
+        throw new Error('クイズの提出に失敗しました')
       }
     } catch (error) {
       console.error('Error submitting quiz:', error)
-      toast.error('Failed to submit quiz')
+      toast.error('クイズの提出に失敗しました')
     } finally {
       setIsSubmitting(false)
     }
   }
 
   if (!currentQuestion) {
-    return <div>Loading...</div>
+    return <div>読み込み中...</div>
   }
 
   return (
@@ -139,8 +139,8 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
       {/* Progress */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span>Question {currentQuestionIndex + 1} of {quiz.questions.length}</span>
-          <span>{Math.round(progress)}% complete</span>
+          <span>問題 {currentQuestionIndex + 1} / {quiz.questions.length}</span>
+          <span>{Math.round(progress)}% 完了</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
@@ -150,12 +150,12 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <Badge variant="outline">
-              {currentQuestion.type === 'multiple_choice' ? 'Multiple Choice' : 'Text Answer'}
+              {currentQuestion.type === 'multiple_choice' ? '選択問題' : '記述問題'}
             </Badge>
             {answers[currentQuestion.id] !== undefined && (
               <Badge variant="secondary">
                 <CheckCircle className="h-3 w-3 mr-1" />
-                Answered
+                回答済み
               </Badge>
             )}
           </div>
@@ -183,7 +183,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
             </RadioGroup>
           ) : (
             <Textarea
-              placeholder="Enter your answer here..."
+              placeholder="ここに回答を入力してください..."
               value={currentAnswer}
               onChange={(e) => handleAnswerChange(e.target.value)}
               rows={4}
@@ -198,7 +198,7 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
               disabled={currentQuestionIndex === 0}
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              前へ
             </Button>
 
             <Button
@@ -206,10 +206,10 @@ export function QuizPlayer({ quiz }: QuizPlayerProps) {
               disabled={!hasAnswer || isSubmitting}
             >
               {isLastQuestion ? (
-                isSubmitting ? 'Submitting...' : 'Submit Quiz'
+                isSubmitting ? '提出中...' : 'クイズ提出'
               ) : (
                 <>
-                  Next
+                  次へ
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </>
               )}

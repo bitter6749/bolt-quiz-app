@@ -22,7 +22,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p>Loading...</p>
+          <p>読み込み中...</p>
         </div>
       </div>
     )
@@ -41,9 +41,9 @@ export default function LoginPage() {
               <GraduationCap className="h-12 w-12 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to QuizAI</CardTitle>
+          <CardTitle className="text-2xl">QuizAIへようこそ</CardTitle>
           <CardDescription>
-            Sign in to start creating and taking AI-generated quizzes
+            サインインしてAI生成クイズの作成と受験を開始しましょう
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -52,7 +52,7 @@ export default function LoginPage() {
             className="w-full"
             size="lg"
           >
-            Sign in with Google
+            Googleでサインイン
           </Button>
         </CardContent>
       </Card>

@@ -23,7 +23,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p>Loading...</p>
+          <p>読み込み中...</p>
         </div>
       </div>
     )
@@ -45,21 +45,21 @@ export default function Home() {
           
           <div className="space-y-4">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Learn Smarter with
-              <span className="text-primary"> AI-Generated</span> Quizzes
+              <span className="text-primary">AI生成クイズ</span>で
+              スマートに学習
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Transform any topic or PDF document into interactive quizzes. 
-              Perfect for students, educators, and professionals.
+              あらゆるトピックやPDFドキュメントをインタラクティブなクイズに変換。
+              学生、教育者、専門家に最適です。
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
-              <Link href="/login">Get Started</Link>
+              <Link href="/login">始める</Link>
             </Button>
             <Button variant="outline" size="lg">
-              Learn More
+              詳細を見る
             </Button>
           </div>
         </div>
@@ -68,9 +68,9 @@ export default function Home() {
           <Card>
             <CardHeader>
               <Sparkles className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>AI-Powered Generation</CardTitle>
+              <CardTitle>AI駆動生成</CardTitle>
               <CardDescription>
-                Create quizzes from any topic using advanced AI. Just describe what you want to learn.
+                高度なAIを使用して、あらゆるトピックからクイズを作成。学習したい内容を説明するだけです。
               </CardDescription>
             </CardHeader>
           </Card>
@@ -78,9 +78,9 @@ export default function Home() {
           <Card>
             <CardHeader>
               <Upload className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>PDF to Quiz</CardTitle>
+              <CardTitle>PDFからクイズ</CardTitle>
               <CardDescription>
-                Upload any PDF document and automatically generate relevant quiz questions.
+                任意のPDFドキュメントをアップロードして、関連するクイズ問題を自動生成します。
               </CardDescription>
             </CardHeader>
           </Card>
@@ -88,21 +88,21 @@ export default function Home() {
           <Card>
             <CardHeader>
               <BarChart3 className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Track Progress</CardTitle>
+              <CardTitle>進捗追跡</CardTitle>
               <CardDescription>
-                Monitor your learning progress with detailed analytics and performance tracking.
+                詳細な分析とパフォーマンス追跡で学習の進捗を監視します。
               </CardDescription>
             </CardHeader>
           </Card>
         </div>
 
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-semibold">Ready to get started?</h2>
+          <h2 className="text-2xl font-semibold">始める準備はできましたか？</h2>
           <p className="text-muted-foreground">
-            Sign in with Google to begin creating your first AI-generated quiz.
+            Googleでサインインして、最初のAI生成クイズの作成を開始しましょう。
           </p>
           <Button asChild size="lg">
-            <Link href="/login">Sign In</Link>
+            <Link href="/login">サインイン</Link>
           </Button>
         </div>
       </div>
