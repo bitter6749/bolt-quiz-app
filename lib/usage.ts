@@ -9,7 +9,7 @@ export async function checkMonthlyLimit(userId: string): Promise<boolean> {
   })
   
   const MONTHLY_LIMIT = 10
-  return (usage?.totalPrompts || 0) < MONTHLY_LIMIT
+  return (usage?.total_prompts || 0) < MONTHLY_LIMIT
 }
 
 export async function getCurrentUsage(userId: string): Promise<{ used: number; limit: number }> {
@@ -21,7 +21,7 @@ export async function getCurrentUsage(userId: string): Promise<{ used: number; l
   })
   
   return {
-    used: usage?.totalPrompts || 0,
+    used: usage?.total_prompts || 0,
     limit: 10,
   }
 }
@@ -36,28 +36,33 @@ export async function recordUsage(
   
   // Create usage log
   await usageLogDb.create({ 
-    userId, 
+    user_id: userId, 
     action, 
-    promptText, 
-    costEstimate,
-    monthYear: currentMonth 
+    prompt_text: promptText, 
+    cost_estimate: costEstimate,
+    month_year: currentMonth 
   })
   
   // Update monthly usage
+  const existingUsage = await monthlyUsageDb.findUnique({ 
+    userId, 
+    monthYear: currentMonth 
+  })
+  
   await monthlyUsageDb.upsert(
     { 
       userId, 
       monthYear: currentMonth 
     },
     { 
-      totalPrompts: (await monthlyUsageDb.findUnique({ userId, monthYear: currentMonth }))?.totalPrompts + 1 || 1,
-      totalCost: ((await monthlyUsageDb.findUnique({ userId, monthYear: currentMonth }))?.totalCost || 0) + (costEstimate || 0)
+      total_prompts: (existingUsage?.total_prompts || 0) + 1,
+      total_cost: (existingUsage?.total_cost || 0) + (costEstimate || 0)
     },
     { 
-      userId, 
-      monthYear: currentMonth, 
-      totalPrompts: 1,
-      totalCost: costEstimate || 0
+      user_id: userId, 
+      month_year: currentMonth, 
+      total_prompts: 1,
+      total_cost: costEstimate || 0
     }
   )
 }

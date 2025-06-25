@@ -3,16 +3,19 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Trophy, Target } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Calendar, Trophy, Target, Eye } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
+import Link from 'next/link'
 
 interface QuizAttempt {
   id: string
   score: number
-  totalQuestions: number
-  completedAt: string
-  quizSet: {
+  total_questions: number
+  completed_at: string
+  quiz_set: {
+    id: string
     title: string
     description: string
   }
@@ -23,10 +26,22 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // This would be implemented with a proper API endpoint
-    // For now, showing the structure
-    setLoading(false)
+    fetchAttempts()
   }, [])
+
+  const fetchAttempts = async () => {
+    try {
+      const response = await fetch('/api/user/attempts')
+      if (response.ok) {
+        const data = await response.json()
+        setAttempts(data)
+      }
+    } catch (error) {
+      console.error('Error fetching attempts:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getScoreColor = (percentage: number) => {
     if (percentage >= 80) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
@@ -72,37 +87,48 @@ export default function HistoryPage() {
               <p className="text-sm text-muted-foreground mt-1">
                 最初のクイズに挑戦して、ここで進捗を確認しましょう！
               </p>
+              <Button asChild className="mt-4">
+                <Link href="/dashboard">クイズを作成</Link>
+              </Button>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
             {attempts.map((attempt) => {
-              const percentage = Math.round((attempt.score / attempt.totalQuestions) * 100)
+              const percentage = Math.round((attempt.score / attempt.total_questions) * 100)
               
               return (
                 <Card key={attempt.id}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
-                        <CardTitle className="text-lg">{attempt.quizSet.title}</CardTitle>
-                        {attempt.quizSet.description && (
-                          <CardDescription>{attempt.quizSet.description}</CardDescription>
+                        <CardTitle className="text-lg">{attempt.quiz_set.title}</CardTitle>
+                        {attempt.quiz_set.description && (
+                          <CardDescription>{attempt.quiz_set.description}</CardDescription>
                         )}
                       </div>
-                      <Badge className={getScoreColor(percentage)}>
-                        {attempt.score}/{attempt.totalQuestions} ({percentage}%)
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getScoreColor(percentage)}>
+                          {attempt.score}/{attempt.total_questions} ({percentage}%)
+                        </Badge>
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/quiz/${attempt.quiz_set.id}`}>
+                            <Eye className="h-3 w-3 mr-1" />
+                            再挑戦
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {formatDistanceToNow(new Date(attempt.completedAt), { addSuffix: true, locale: ja })}
+                        {formatDistanceToNow(new Date(attempt.completed_at), { addSuffix: true, locale: ja })}
                       </div>
                       <div className="flex items-center gap-1">
                         <Target className="h-4 w-4" />
-                        {attempt.totalQuestions}問
+                        {attempt.total_questions}問
                       </div>
                     </div>
                   </CardContent>

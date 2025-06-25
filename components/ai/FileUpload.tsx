@@ -15,23 +15,22 @@ interface FileUploadProps {
 
 export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null)
-  const [prompt, setPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const pdfFile = acceptedFiles[0]
-    if (pdfFile && pdfFile.type === 'application/pdf') {
-      setFile(pdfFile)
-      toast.success('PDFファイルが選択されました')
+    const jsonFile = acceptedFiles[0]
+    if (jsonFile && jsonFile.type === 'application/json') {
+      setFile(jsonFile)
+      toast.success('JSONファイルが選択されました')
     } else {
-      toast.error('PDFファイルを選択してください')
+      toast.error('JSONファイルを選択してください')
     }
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf']
+      'application/json': ['.json']
     },
     multiple: false,
     disabled: disabled || isGenerating
@@ -41,37 +40,27 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
     e.preventDefault()
     
     if (!file) {
-      toast.error('PDFファイルを選択してください')
+      toast.error('JSONファイルを選択してください')
       return
     }
 
     setIsGenerating(true)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      if (prompt.trim()) {
-        formData.append('prompt', prompt)
+      const text = await file.text()
+      const quizData = JSON.parse(text)
+      
+      // Validate quiz structure
+      if (!quizData.title || !quizData.questions || !Array.isArray(quizData.questions)) {
+        throw new Error('無効なクイズデータ形式です')
       }
 
-      const response = await fetch('/api/ai/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'PDFからのクイズ生成に失敗しました')
-      }
-
-      const quizData = await response.json()
       onGenerate(quizData)
       setFile(null)
-      setPrompt('')
-      toast.success('PDFからクイズが正常に生成されました！')
+      toast.success('JSONからクイズが正常に読み込まれました！')
     } catch (error) {
-      console.error('Error generating quiz from PDF:', error)
-      toast.error(error instanceof Error ? error.message : 'PDFからのクイズ生成に失敗しました')
+      console.error('Error loading quiz from JSON:', error)
+      toast.error(error instanceof Error ? error.message : 'JSONからのクイズ読み込みに失敗しました')
     } finally {
       setIsGenerating(false)
     }
@@ -86,10 +75,10 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          PDFからクイズ生成
+          JSONからクイズ読み込み
         </CardTitle>
         <CardDescription>
-          PDFドキュメントをアップロードし、オプションで焦点を当てる内容を指定してください
+          クイズデータが含まれたJSONファイルをアップロードしてください
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -106,11 +95,11 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
               <input {...getInputProps()} />
               <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
               {isDragActive ? (
-                <p>PDFファイルをここにドロップしてください...</p>
+                <p>JSONファイルをここにドロップしてください...</p>
               ) : (
                 <div>
                   <p className="text-sm font-medium">クリックしてアップロードまたはドラッグ&ドロップ</p>
-                  <p className="text-xs text-muted-foreground">PDFファイルのみ</p>
+                  <p className="text-xs text-muted-foreground">JSONファイルのみ</p>
                 </div>
               )}
             </div>
@@ -132,14 +121,6 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
             </div>
           )}
           
-          <Textarea
-            placeholder="オプション：焦点を当てる内容を指定してください（例：「重要な概念と定義に焦点を当てる」）"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            rows={2}
-            disabled={disabled || isGenerating}
-          />
-          
           <Button 
             type="submit" 
             disabled={disabled || isGenerating || !file}
@@ -148,12 +129,12 @@ export function FileUpload({ onGenerate, disabled }: FileUploadProps) {
             {isGenerating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                PDF処理中...
+                JSON処理中...
               </>
             ) : (
               <>
                 <Upload className="mr-2 h-4 w-4" />
-                PDFからクイズ生成
+                JSONからクイズ読み込み
               </>
             )}
           </Button>

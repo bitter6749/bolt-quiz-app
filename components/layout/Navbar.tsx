@@ -54,48 +54,50 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="font-bold text-lg">QuizAI</span>
-        </Link>
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <GraduationCap className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg">QuizAI</span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6">
-          <NavLinks />
-        </div>
-
-        {/* Right side controls */}
-        <div className="flex items-center space-x-2">
-          <ThemeToggle />
-          <div className="hidden md:block">
-            <LoginButton />
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-6">
+            <NavLinks />
           </div>
-          
-          {/* Mobile menu */}
-          <div className="md:hidden">
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px]">
-                <SheetHeader>
-                  <SheetTitle>メニュー</SheetTitle>
-                  <SheetDescription>
-                    ナビゲーションメニュー
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="flex flex-col space-y-4 mt-6">
-                  <NavLinks />
-                  <div className="pt-4 border-t">
-                    <LoginButton />
+
+          {/* Right side controls */}
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <div className="hidden md:block">
+              <LoginButton />
+            </div>
+            
+            {/* Mobile menu */}
+            <div className="md:hidden">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px]">
+                  <SheetHeader>
+                    <SheetTitle>メニュー</SheetTitle>
+                    <SheetDescription>
+                      ナビゲーションメニュー
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="flex flex-col space-y-4 mt-6">
+                    <NavLinks />
+                    <div className="pt-4 border-t">
+                      <LoginButton />
+                    </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>
