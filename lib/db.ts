@@ -1,4 +1,14 @@
-import { supabase, createServerSupabaseClient } from './supabase'
+import fs from 'fs/promises'
+import path from 'path'
+
+const DB_PATH = path.join(process.cwd(), 'data')
+const USERS_FILE = path.join(DB_PATH, 'users.json')
+const QUIZ_SETS_FILE = path.join(DB_PATH, 'quiz-sets.json')
+const QUIZ_ATTEMPTS_FILE = path.join(DB_PATH, 'quiz-attempts.json')
+const USAGE_LOGS_FILE = path.join(DB_PATH, 'usage-logs.json')
+const MONTHLY_USAGE_FILE = path.join(DB_PATH, 'monthly-usage.json')
+const ACCOUNTS_FILE = path.join(DB_PATH, 'accounts.json')
+const SESSIONS_FILE = path.join(DB_PATH, 'sessions.json')
 
 export interface User {
   id: string
@@ -6,240 +16,303 @@ export interface User {
   name?: string
   image?: string
   role: 'USER' | 'ADMIN'
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Account {
+  id: string
+  userId: string
+  type: string
+  provider: string
+  providerAccountId: string
+  refresh_token?: string
+  access_token?: string
+  expires_at?: number
+  token_type?: string
+  scope?: string
+  id_token?: string
+  session_state?: string
+}
+
+export interface Session {
+  id: string
+  sessionToken: string
+  userId: string
+  expires: string
 }
 
 export interface QuizSet {
   id: string
   title: string
   description?: string
-  questions: any // JSON data
-  created_by: string
-  created_at: string
-  updated_at: string
+  questions: string // JSON string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface QuizAttempt {
   id: string
-  user_id: string
-  quiz_set_id: string
-  answers: any // JSON data
+  userId: string
+  quizSetId: string
+  answers: string // JSON string
   score: number
-  total_questions: number
-  completed_at: string
-}
-
-export interface MonthlyUsage {
-  id: string
-  user_id: string
-  month_year: string
-  total_prompts: number
-  total_cost: number
-  last_updated: string
+  totalQuestions: number
+  completedAt: string
 }
 
 export interface UsageLog {
   id: string
-  user_id: string
+  userId: string
   action: string
-  prompt_text?: string
-  cost_estimate?: number
-  created_at: string
-  month_year: string
+  promptText?: string
+  costEstimate?: number
+  createdAt: string
+  monthYear: string
+}
+
+export interface MonthlyUsage {
+  id: string
+  userId: string
+  monthYear: string
+  totalPrompts: number
+  totalCost: number
+  lastUpdated: string
+}
+
+// Ensure data directory exists
+async function ensureDataDir() {
+  try {
+    await fs.access(DB_PATH)
+  } catch {
+    await fs.mkdir(DB_PATH, { recursive: true })
+  }
+}
+
+// Generic file operations
+async function readJsonFile<T>(filePath: string): Promise<T[]> {
+  try {
+    const data = await fs.readFile(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch {
+    return []
+  }
+}
+
+async function writeJsonFile<T>(filePath: string, data: T[]): Promise<void> {
+  await ensureDataDir()
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2))
+}
+
+function generateId(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36)
 }
 
 // User operations
 export const userDb = {
   async findUnique(where: { id?: string; email?: string }): Promise<User | null> {
-    const client = createServerSupabaseClient()
-    let query = client.from('users').select('*')
-    
-    if (where.id) {
-      query = query.eq('id', where.id)
-    } else if (where.email) {
-      query = query.eq('email', where.email)
+    const users = await readJsonFile<User>(USERS_FILE)
+    return users.find(user => 
+      (where.id && user.id === where.id) || 
+      (where.email && user.email === where.email)
+    ) || null
+  },
+
+  async create(data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+    const users = await readJsonFile<User>(USERS_FILE)
+    const newUser: User = {
+      ...data,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
-    
-    const { data, error } = await query.single()
-    if (error) return null
-    return data
+    users.push(newUser)
+    await writeJsonFile(USERS_FILE, users)
+    return newUser
   },
 
-  async create(data: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
-    const client = createServerSupabaseClient()
-    const { data: user, error } = await client
-      .from('users')
-      .insert([data])
-      .select()
-      .single()
+  async update(id: string, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<User | null> {
+    const users = await readJsonFile<User>(USERS_FILE)
+    const index = users.findIndex(user => user.id === id)
+    if (index === -1) return null
     
-    if (error) throw error
-    return user
+    users[index] = {
+      ...users[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    }
+    await writeJsonFile(USERS_FILE, users)
+    return users[index]
+  }
+}
+
+// Account operations
+export const accountDb = {
+  async create(data: Omit<Account, 'id'>): Promise<Account> {
+    const accounts = await readJsonFile<Account>(ACCOUNTS_FILE)
+    const newAccount: Account = {
+      ...data,
+      id: generateId(),
+    }
+    accounts.push(newAccount)
+    await writeJsonFile(ACCOUNTS_FILE, accounts)
+    return newAccount
   },
 
-  async update(id: string, data: Partial<Omit<User, 'id' | 'created_at'>>): Promise<User | null> {
-    const client = createServerSupabaseClient()
-    const { data: user, error } = await client
-      .from('users')
-      .update({ ...data, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single()
+  async findFirst(where: { userId: string; provider: string }): Promise<Account | null> {
+    const accounts = await readJsonFile<Account>(ACCOUNTS_FILE)
+    return accounts.find(account => 
+      account.userId === where.userId && account.provider === where.provider
+    ) || null
+  }
+}
+
+// Session operations
+export const sessionDb = {
+  async create(data: Omit<Session, 'id'>): Promise<Session> {
+    const sessions = await readJsonFile<Session>(SESSIONS_FILE)
+    const newSession: Session = {
+      ...data,
+      id: generateId(),
+    }
+    sessions.push(newSession)
+    await writeJsonFile(SESSIONS_FILE, sessions)
+    return newSession
+  },
+
+  async findUnique(where: { sessionToken: string }): Promise<Session | null> {
+    const sessions = await readJsonFile<Session>(SESSIONS_FILE)
+    return sessions.find(session => session.sessionToken === where.sessionToken) || null
+  },
+
+  async update(sessionToken: string, data: Partial<Session>): Promise<Session | null> {
+    const sessions = await readJsonFile<Session>(SESSIONS_FILE)
+    const index = sessions.findIndex(session => session.sessionToken === sessionToken)
+    if (index === -1) return null
     
-    if (error) return null
-    return user
+    sessions[index] = { ...sessions[index], ...data }
+    await writeJsonFile(SESSIONS_FILE, sessions)
+    return sessions[index]
+  },
+
+  async delete(where: { sessionToken: string }): Promise<void> {
+    const sessions = await readJsonFile<Session>(SESSIONS_FILE)
+    const filtered = sessions.filter(session => session.sessionToken !== where.sessionToken)
+    await writeJsonFile(SESSIONS_FILE, filtered)
   }
 }
 
 // QuizSet operations
 export const quizSetDb = {
   async findMany(where?: { createdBy?: string }): Promise<QuizSet[]> {
-    const client = createServerSupabaseClient()
-    let query = client.from('quiz_sets').select('*').order('created_at', { ascending: false })
-    
+    const quizSets = await readJsonFile<QuizSet>(QUIZ_SETS_FILE)
     if (where?.createdBy) {
-      query = query.eq('created_by', where.createdBy)
+      return quizSets.filter(quiz => quiz.createdBy === where.createdBy)
     }
-    
-    const { data, error } = await query
-    if (error) throw error
-    return data || []
+    return quizSets
   },
 
   async findUnique(where: { id: string }): Promise<QuizSet | null> {
-    const client = createServerSupabaseClient()
-    const { data, error } = await client
-      .from('quiz_sets')
-      .select('*')
-      .eq('id', where.id)
-      .single()
-    
-    if (error) return null
-    return data
+    const quizSets = await readJsonFile<QuizSet>(QUIZ_SETS_FILE)
+    return quizSets.find(quiz => quiz.id === where.id) || null
   },
 
-  async create(data: Omit<QuizSet, 'id' | 'created_at' | 'updated_at'>): Promise<QuizSet> {
-    const client = createServerSupabaseClient()
-    const { data: quizSet, error } = await client
-      .from('quiz_sets')
-      .insert([data])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return quizSet
+  async create(data: Omit<QuizSet, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuizSet> {
+    const quizSets = await readJsonFile<QuizSet>(QUIZ_SETS_FILE)
+    const newQuizSet: QuizSet = {
+      ...data,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    quizSets.push(newQuizSet)
+    await writeJsonFile(QUIZ_SETS_FILE, quizSets)
+    return newQuizSet
   },
 
   async delete(where: { id: string }): Promise<void> {
-    const client = createServerSupabaseClient()
-    const { error } = await client
-      .from('quiz_sets')
-      .delete()
-      .eq('id', where.id)
-    
-    if (error) throw error
+    const quizSets = await readJsonFile<QuizSet>(QUIZ_SETS_FILE)
+    const filtered = quizSets.filter(quiz => quiz.id !== where.id)
+    await writeJsonFile(QUIZ_SETS_FILE, filtered)
   }
 }
 
 // QuizAttempt operations
 export const quizAttemptDb = {
-  async create(data: Omit<QuizAttempt, 'id' | 'completed_at'>): Promise<QuizAttempt> {
-    const client = createServerSupabaseClient()
-    const { data: attempt, error } = await client
-      .from('quiz_attempts')
-      .insert([{ ...data, completed_at: new Date().toISOString() }])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return attempt
+  async create(data: Omit<QuizAttempt, 'id' | 'completedAt'>): Promise<QuizAttempt> {
+    const attempts = await readJsonFile<QuizAttempt>(QUIZ_ATTEMPTS_FILE)
+    const newAttempt: QuizAttempt = {
+      ...data,
+      id: generateId(),
+      completedAt: new Date().toISOString(),
+    }
+    attempts.push(newAttempt)
+    await writeJsonFile(QUIZ_ATTEMPTS_FILE, attempts)
+    return newAttempt
   },
 
   async count(where: { quizSetId: string }): Promise<number> {
-    const client = createServerSupabaseClient()
-    const { count, error } = await client
-      .from('quiz_attempts')
-      .select('*', { count: 'exact', head: true })
-      .eq('quiz_set_id', where.quizSetId)
-    
-    if (error) throw error
-    return count || 0
-  },
-
-  async findMany(where: { userId: string }): Promise<(QuizAttempt & { quiz_set: QuizSet })[]> {
-    const client = createServerSupabaseClient()
-    const { data, error } = await client
-      .from('quiz_attempts')
-      .select(`
-        *,
-        quiz_set:quiz_sets(*)
-      `)
-      .eq('user_id', where.userId)
-      .order('completed_at', { ascending: false })
-    
-    if (error) throw error
-    return data || []
+    const attempts = await readJsonFile<QuizAttempt>(QUIZ_ATTEMPTS_FILE)
+    return attempts.filter(attempt => attempt.quizSetId === where.quizSetId).length
   }
 }
 
 // MonthlyUsage operations
 export const monthlyUsageDb = {
   async findUnique(where: { userId: string; monthYear: string }): Promise<MonthlyUsage | null> {
-    const client = createServerSupabaseClient()
-    const { data, error } = await client
-      .from('monthly_usage')
-      .select('*')
-      .eq('user_id', where.userId)
-      .eq('month_year', where.monthYear)
-      .single()
-    
-    if (error) return null
-    return data
+    const usage = await readJsonFile<MonthlyUsage>(MONTHLY_USAGE_FILE)
+    return usage.find(u => u.userId === where.userId && u.monthYear === where.monthYear) || null
   },
 
-  async create(data: Omit<MonthlyUsage, 'id' | 'last_updated'>): Promise<MonthlyUsage> {
-    const client = createServerSupabaseClient()
-    const { data: usage, error } = await client
-      .from('monthly_usage')
-      .insert([{ ...data, last_updated: new Date().toISOString() }])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return usage
+  async create(data: Omit<MonthlyUsage, 'id' | 'lastUpdated'>): Promise<MonthlyUsage> {
+    const usage = await readJsonFile<MonthlyUsage>(MONTHLY_USAGE_FILE)
+    const newUsage: MonthlyUsage = {
+      ...data,
+      id: generateId(),
+      lastUpdated: new Date().toISOString(),
+    }
+    usage.push(newUsage)
+    await writeJsonFile(MONTHLY_USAGE_FILE, usage)
+    return newUsage
   },
 
-  async upsert(where: { userId: string; monthYear: string }, update: Partial<MonthlyUsage>, create: Omit<MonthlyUsage, 'id' | 'last_updated'>): Promise<MonthlyUsage> {
-    const client = createServerSupabaseClient()
-    const { data: usage, error } = await client
-      .from('monthly_usage')
-      .upsert([{
-        user_id: where.userId,
-        month_year: where.monthYear,
+  async upsert(where: { userId: string; monthYear: string }, update: Partial<MonthlyUsage>, create: Omit<MonthlyUsage, 'id' | 'lastUpdated'>): Promise<MonthlyUsage> {
+    const usage = await readJsonFile<MonthlyUsage>(MONTHLY_USAGE_FILE)
+    const index = usage.findIndex(u => u.userId === where.userId && u.monthYear === where.monthYear)
+    
+    if (index !== -1) {
+      usage[index] = {
+        ...usage[index],
         ...update,
+        lastUpdated: new Date().toISOString(),
+      }
+      await writeJsonFile(MONTHLY_USAGE_FILE, usage)
+      return usage[index]
+    } else {
+      const newUsage: MonthlyUsage = {
         ...create,
-        last_updated: new Date().toISOString()
-      }])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return usage
+        id: generateId(),
+        lastUpdated: new Date().toISOString(),
+      }
+      usage.push(newUsage)
+      await writeJsonFile(MONTHLY_USAGE_FILE, usage)
+      return newUsage
+    }
   }
 }
 
 // UsageLog operations
 export const usageLogDb = {
-  async create(data: Omit<UsageLog, 'id' | 'created_at'>): Promise<UsageLog> {
-    const client = createServerSupabaseClient()
-    const { data: log, error } = await client
-      .from('usage_logs')
-      .insert([{ ...data, created_at: new Date().toISOString() }])
-      .select()
-      .single()
-    
-    if (error) throw error
-    return log
+  async create(data: Omit<UsageLog, 'id' | 'createdAt'>): Promise<UsageLog> {
+    const logs = await readJsonFile<UsageLog>(USAGE_LOGS_FILE)
+    const newLog: UsageLog = {
+      ...data,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+    }
+    logs.push(newLog)
+    await writeJsonFile(USAGE_LOGS_FILE, logs)
+    return newLog
   }
 }

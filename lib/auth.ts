@@ -1,6 +1,6 @@
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
-import { userDb, monthlyUsageDb } from './db'
+import { userDb, accountDb, sessionDb, monthlyUsageDb } from './db'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -33,10 +33,27 @@ export const authOptions: NextAuthOptions = {
           // Create initial monthly usage record
           const currentMonth = new Date().toISOString().slice(0, 7)
           await monthlyUsageDb.create({
-            user_id: existingUser.id,
-            month_year: currentMonth,
-            total_prompts: 0,
-            total_cost: 0,
+            userId: existingUser.id,
+            monthYear: currentMonth,
+            totalPrompts: 0,
+            totalCost: 0,
+          })
+        }
+        
+        // Create or update account
+        if (account) {
+          await accountDb.create({
+            userId: existingUser.id,
+            type: account.type,
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            refresh_token: account.refresh_token,
+            access_token: account.access_token,
+            expires_at: account.expires_at,
+            token_type: account.token_type,
+            scope: account.scope,
+            id_token: account.id_token,
+            session_state: account.session_state,
           })
         }
         

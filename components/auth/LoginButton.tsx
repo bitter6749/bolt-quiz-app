@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LogOut, Settings, User } from 'lucide-react'
-import Link from 'next/link'
 
 export function LoginButton() {
   const { data: session, status } = useSession()
@@ -51,17 +50,13 @@ export function LoginButton() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/profile">
-            <User className="mr-2 h-4 w-4" />
-            <span>プロフィール</span>
-          </Link>
+        <DropdownMenuItem>
+          <User className="mr-2 h-4 w-4" />
+          <span>プロフィール</span>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/settings">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>設定</span>
-          </Link>
+        <DropdownMenuItem>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>設定</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>

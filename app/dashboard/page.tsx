@@ -100,9 +100,9 @@ export default function Dashboard() {
                     <Sparkles className="mr-2 h-4 w-4" />
                     プロンプトから
                   </TabsTrigger>
-                  <TabsTrigger value="json">
+                  <TabsTrigger value="pdf">
                     <Upload className="mr-2 h-4 w-4" />
-                    JSONから
+                    PDFから
                   </TabsTrigger>
                 </TabsList>
                 
@@ -110,7 +110,7 @@ export default function Dashboard() {
                   <PromptForm onGenerate={handleQuizGenerated} />
                 </TabsContent>
                 
-                <TabsContent value="json">
+                <TabsContent value="pdf">
                   <FileUpload onGenerate={handleQuizGenerated} />
                 </TabsContent>
               </Tabs>

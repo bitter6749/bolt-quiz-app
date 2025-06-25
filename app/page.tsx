@@ -49,7 +49,7 @@ export default function Home() {
               スマートに学習
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              あらゆるトピックやJSONデータをインタラクティブなクイズに変換。
+              あらゆるトピックやPDFドキュメントをインタラクティブなクイズに変換。
               学生、教育者、専門家に最適です。
             </p>
           </div>
@@ -78,9 +78,9 @@ export default function Home() {
           <Card>
             <CardHeader>
               <Upload className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>JSONからクイズ</CardTitle>
+              <CardTitle>PDFからクイズ</CardTitle>
               <CardDescription>
-                既存のクイズデータをJSONファイルでアップロードして、すぐにクイズを開始できます。
+                任意のPDFドキュメントをアップロードして、関連するクイズ問題を自動生成します。
               </CardDescription>
             </CardHeader>
           </Card>
